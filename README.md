@@ -1,45 +1,109 @@
 # Rozh
 
-Rozh is a Kurdish-first, cross-platform desktop media encoder built with Electron, React, and FFmpeg.
+**A Kurdish-first desktop video encoder with precise control over video, audio, trimming, and subtitles.**
 
-## Run locally
+[Download Rozh 0.2.0 for Windows x64](https://github.com/Shiiv23/rozh-encoder/releases/latest) · [View all releases](https://github.com/Shiiv23/rozh-encoder/releases) · [Source and license](#development)
 
-1. Run `npm install`. This also downloads a static FFmpeg/FFprobe build for your platform via `ffmpeg-static`/`ffprobe-static` — no separate FFmpeg install needed.
-2. Run `npm run dev`.
+Rozh is built for people who want practical encoding controls and dependable subtitle burn-in in one desktop app. Add one video or build a queue, choose the output you want, preview a subtitle frame, and encode with FFmpeg and FFprobe included.
 
-`npm run build` produces the renderer bundle and Electron main-process files. `npm test` validates FFmpeg argument construction, including Unicode/Kurdish paths and subtitle filters.
+> **Windows:** The current downloadable installer is unsigned. Windows SmartScreen may show an unrecognized-app warning. FFmpeg and FFprobe are bundled; no separate FFmpeg install is needed.
 
-`npm run dist` (or `dist:mac` / `dist:win` / `dist:linux`) builds a packaged, installable app with `electron-builder`. The bundled FFmpeg/FFprobe are platform-specific, so if you're packaging for a platform other than the one you're on, delete `node_modules` and reinstall with `npm_config_platform`/`npm_config_arch` set (or on the target platform/CI) before packaging — see the [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static) and [ffprobe-static](https://github.com/eugeneware/ffprobe-static) READMEs.
+## What Rozh can do
 
-### Code signing & notarization
+### Add, inspect, and queue videos
 
-Unsigned builds trigger Gatekeeper ("app is damaged"/unidentified developer) warnings on macOS and SmartScreen warnings on Windows, so a public release build needs real signing credentials. The `package.json` `build` config and `build/notarize.js` are wired up for this, but **you must supply your own credentials** — none are included here:
+- Add local videos with the file picker or drag and drop.
+- Inspect duration, dimensions, bitrate, chapters, and available video, audio, and subtitle tracks.
+- Process one selected video or run a batch queue.
+- Reorder and remove queued jobs; track progress, cancel an active encode, and get completion notifications.
+- See media and encoding issues reported against the relevant file.
 
-- **macOS**: get a "Developer ID Application" certificate from an active Apple Developer Program membership, then export it as a `.p12` and set:
-  - `CSC_LINK` — path or base64 of the `.p12` file
-  - `CSC_KEY_PASSWORD` — its export password
-  - `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` (from <https://appleid.apple.com>), `APPLE_TEAM_ID` — used by `build/notarize.js` to notarize the signed `.dmg` after `dist:mac` builds it. Without these three set, the build still succeeds but logs a warning and ships unnotarized (Gatekeeper will still block it).
-- **Windows**: get a code-signing certificate (an EV cert avoids SmartScreen's reputation-building delay; a standard OV cert works but SmartScreen warnings taper off over time as the binary accumulates reputation) and set `CSC_LINK` / `CSC_KEY_PASSWORD` for it as well — electron-builder auto-detects those env vars for both platforms. Update `build.win.publisherName` in `package.json` to match the certificate's subject name.
+### Choose your output
 
-None of the above is required for local dev builds (`npm run dev`, `npm start`) — only for `npm run dist*` builds you intend to distribute publicly.
+- Export to **MP4, MKV, or WebM**.
+- Choose **H.264/AVC, H.265/HEVC, AV1, or VP9**, subject to format and encoder compatibility.
+- Select a quality preset—from source/lossless through smaller output—or set a custom quality value.
+- Choose an encoding speed preset.
+- Keep the source size and frame rate, or resize while preserving aspect ratio and choose a frame rate.
+- Pick an output folder or file; Rozh plans output paths for queued videos.
 
-### Third-party licenses
+### Control audio
 
-Rozh's own code is MIT-licensed (`LICENSE`). It bundles FFmpeg/FFprobe, which are LGPL/GPL-licensed — see `THIRD_PARTY_NOTICES.md` for what that requires of anyone distributing Rozh (in short: keeping the license notice, and providing a way for recipients to get the matching FFmpeg source). If you upgrade `ffmpeg-static`/`ffprobe-static` later, update the version/commit link in that file to match what you're actually shipping.
+- Copy compatible source audio without re-encoding, or convert to **AAC** or **Opus** where the chosen output format supports it.
+- Select an audio bitrate for converted tracks.
+- Review the source audio tracks before encoding.
 
-Advanced/override options, if the bundled copy doesn't work on someone's machine (unsupported platform, a custom FFmpeg build with extra codecs, etc.):
-- Set `FFMPEG_PATH` / `FFPROBE_PATH` env vars, or
-- Use Tools → Locate FFmpeg… in the app, which is remembered until Tools → Use Bundled FFmpeg is chosen again.
+### Trim clips
 
-## Implemented vertical slice
+- Set precise start and end timecodes for each video.
+- See the resulting clip length and clear the trim to encode the full video.
 
-- Local-file picker and drag-style empty state
-- FFprobe media inspection for container, duration, video, audio, and subtitle streams
-- Safe FFmpeg process spawning with argument arrays, not shell string concatenation
-- MP4/MKV/WebM, basic quality choices, codecs, audio copying/conversion, and aspect-ratio-safe scaling
-- External SRT/ASS/SSA/VTT-style subtitle burn-in and embedded-track selection
-- **Preview subtitle frame** (Subtitles tab, burn-in mode): renders one frame with the subtitle burned in, in about a second, using the same preparation, fonts and filters as the real encode. By default it picks the longest subtitle line inside the trim range so wrapping and font problems show up; enter a time to check a specific moment.
-- Duration-based real FFmpeg progress and cancellation
-- Kurdish Sorani / English switch with RTL layout
+### Keep, add, or burn subtitles
 
-- FFmpeg and FFprobe ship inside the app (via `ffmpeg-static`/`ffprobe-static`), so installing Rozh is enough — no separate FFmpeg setup step. Rozh still detects binaries at runtime and falls back to a clear "Locate FFmpeg…" flow if the bundled copy can't run on someone's machine.
+- Keep selected embedded subtitle tracks, add an external subtitle as a selectable track, burn a subtitle into the picture, or omit subtitles.
+- Work with external **SRT, ASS/SSA, VTT, SAMI, SubViewer, SBV, TTML/DFXP, and MPL2** subtitle files.
+- Select the embedded subtitle stream or external file to burn in.
+- Choose automatic encoding detection or an explicit text encoding for legacy subtitle files.
+- Preview a rendered subtitle frame before encoding. Rozh can pick a representative line in the trim range, or preview a specific time.
+- Preserve the subtitle file's authored font and styling instead of forcing a font. Arabic and Central Kurdish (Sorani) use right-to-left handling; a bundled font is available only as a fallback when glyphs are missing.
+
+### Adjust the picture
+
+- Add an image watermark and set its position, size, margin, and opacity.
+- Choose from supported output sizes without distorting the original aspect ratio.
+
+### Diagnose and manage encodes
+
+- FFmpeg and FFprobe are bundled and checked by the app.
+- If the bundled tools cannot run on a system, locate a different FFmpeg build from the app; the selection is remembered.
+- Review per-job logs and app-wide encoder logs, open the log folder, or clear old logs.
+- Follow live encode progress, cancel work, and configure completion notifications.
+
+### Use Rozh in Kurdish Sorani or English
+
+- Switch the interface between **Central Kurdish (Sorani)** and **English**.
+- Sorani interface text uses right-to-left layout.
+
+## Download and run
+
+Download the **Windows x64 installer** from the [latest release](https://github.com/Shiiv23/rozh-encoder/releases/latest). The release ZIP contains the installer, third-party license texts, and SHA-256 checksums. Extract it and run `Rozh Setup 0.2.0.exe`.
+
+The installer is currently unsigned, so Windows SmartScreen may display a warning. FFmpeg and FFprobe are bundled with the app; you do not need to install them separately.
+
+## Development
+
+Requirements: Node.js and npm.
+
+```sh
+npm install
+npm run dev
+```
+
+`npm install` downloads the FFmpeg and FFprobe builds used by the current platform.
+
+```sh
+npm test
+npm run build
+```
+
+Package an installer for the current platform, or target a specific platform:
+
+```sh
+npm run dist
+npm run dist:win
+npm run dist:mac
+npm run dist:linux
+```
+
+The FFmpeg binaries are platform-specific. To package for a different OS or architecture, install dependencies for that target or build on the target platform/CI.
+
+### Code signing and notarization
+
+Distributable macOS and Windows builds should be signed. macOS builds also need notarization to avoid Gatekeeper warnings. The `package.json` build configuration and `build/notarize.js` support signing and notarization, but Rozh does not include signing credentials:
+
+- **macOS:** Set `CSC_LINK` and `CSC_KEY_PASSWORD` for your Developer ID certificate, plus `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID` for notarization.
+- **Windows:** Set `CSC_LINK` and `CSC_KEY_PASSWORD` for your code-signing certificate, and set `build.win.publisherName` in `package.json` to the certificate's subject name.
+
+### Licenses
+
+Rozh source code is MIT-licensed; bundled components have their own licenses. See [`LICENSE`](LICENSE) and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before redistributing the app.
