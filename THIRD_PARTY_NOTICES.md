@@ -23,23 +23,25 @@ The FFmpeg package identifies its upstream 6.1.1 binary release and source
 materials at <https://github.com/eugeneware/ffmpeg-static/releases/tag/b6.1.1>.
 The FFmpeg 6.1.1 upstream source is also available at
 <https://ffmpeg.org/releases/ffmpeg-6.1.1.tar.xz>. These links are specific to
-the version bundled with Rozh 0.2.0; verify and update them when upgrading the
+the version bundled with Rozh 0.2.1; verify and update them when upgrading the
 FFmpeg packages. Rozh's MIT license does not replace or override any
 third-party license.
 
-## Noto Naskh Arabic
+## Noto Arabic fonts
 
-Rozh ships the "Noto Naskh Arabic" font (`resources/fonts/NotoNaskhArabic.ttf`)
-only as a last-resort source of Arabic/Sorani-Kurdish glyphs for burned-in
-subtitles, used when neither the font a subtitle asks for nor anything
-installed on the user's device has the letters. It is never forced onto a
+Rozh ships "Noto Naskh Arabic" (`resources/fonts/NotoNaskhArabic.ttf`) and
+"Noto Sans Arabic" (`resources/fonts/NotoSansArabic.ttf`) only as last-resort
+sources of Arabic-script glyphs for burned-in subtitles. Noto Sans Arabic
+includes support for Central Kurdish and Kurdish (Arabic script). These fonts
+are used only when neither the font a subtitle asks for nor anything installed
+on the user's device has the required glyphs. They are never forced onto a
 subtitle: burned-in text uses the font named in the subtitle file, resolved
-against the user's own installed fonts. It is Copyright 2022 The Noto
+against the user's own installed fonts. Both are Copyright © 2022 The Noto
 Project Authors and licensed under the **SIL Open Font License, Version
 1.1** — see `resources/fonts/OFL.txt` for the full text. The OFL permits
 bundling and redistribution (including in a commercial app) as long as the
-font isn't sold on its own and the license file travels with it, both of
-which are satisfied here.
+fonts aren't sold on their own and the license file travels with them, both
+of which are satisfied here.
 
 ## Other dependencies
 
